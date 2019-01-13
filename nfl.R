@@ -97,8 +97,8 @@ GetGamePassFrames <- function(plays.df, game.tracking.df) {
   return(df.list)
 }
 
-plays.df <- plays
-game.tracking.df <- tracking_gameId_2017092100
+plays.df <- read.csv("~/Downloads/Big-Data-Bowl-master/Data/plays.csv")
+game.tracking.df <- read.csv("~/Downloads/Big-Data-Bowl-master/Data/tracking_gameId_2017090700.csv")
 test <- GetGamePassFrames(plays.df, game.tracking.df)
 
 ggplot(test[[2]]) + geom_point(aes(x=x, y=y, colour=team), size=4)
