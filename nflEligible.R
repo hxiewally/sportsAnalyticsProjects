@@ -34,7 +34,7 @@ for (i in 1:length(tracking.frame$team)) {
 # filter for eligible receivers
 
 for (i in 1:length(tracking.frame$jerseyNumber)) {
-  if ((tracking.frame$jerseyNumber[i] < 50) & (tracking.frame$offense[i] == T) & (tracking.frame$dBall[i] > 0.9) | (tracking.frame$jerseyNumber[i] > 79) & (tracking.frame$offense[i] == T) & (tracking.frame$dBall[i] > 0.9)) {
+  if ((tracking.frame$jerseyNumber[i] < 50) & (tracking.frame$offense[i] == T) & (tracking.frame$dBall[i] > 0.9) | (tracking.frame$jerseyNumber[i] > 79) & (tracking.frame$offense[i] == T) & (tracking.frame$dBall[i] > min(tracking.frame$dBall[tracking.frame$dBall > 0])) {
     tracking.frame$eligible[i] <- T
   }
   else {
