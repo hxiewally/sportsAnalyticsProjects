@@ -6,7 +6,7 @@ plays <- read.csv("plays.csv")
 # load tracking data for the game between SF 49ers and LA Rams
 current.gameId <- 2017092100
 # filter out plays in this game 
-current.plays <- plays[plays$gameId == current.gameId, ]
+current.plays <- plays[plays$gameId == current.gameId,]
 
 # see if the plays in tracking data match plays data
 current.plays$playId
