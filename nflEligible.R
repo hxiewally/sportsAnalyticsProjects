@@ -16,7 +16,7 @@ for (i in 1:length(tracking.frame$jerseyNumber)) {
 # identify offense - find quarterback in frame, quarterback team is offense
 
 tracking.frame$offense <- NA
-tracking.frame.qb <- filter(tracking.frame, dBall < 0.9 & team != "ball")
+tracking.frame.qb <- filter(tracking.frame, team != "ball" & dBall == min(tracking.frame$dBall[tracking.frame$dBall > 0]))
 qbTeam <- tracking.frame.qb$team  
 
 for (i in 1:length(tracking.frame$team)) {
