@@ -28,7 +28,7 @@ unique(tracking.single.play$frame.id)
 # different events that can happen in a frame
 levels(tracking.third.passing$event)
 
-#tracking.frame <- tracking.single.play[tracking.single.play$frame.id == 1, ]
+# tracking.frame <- tracking.single.play[tracking.single.play$frame.id == 1, ]
 tracking.single.play$event
 
 # find the frame when the ball is thrown
@@ -42,4 +42,6 @@ library(ggplot2)
 
 ggplot(tracking.frame) + geom_point(aes(x=x, y=y, colour=team))
 
-#expected yards after catch based on how open someone is
+# track distance away from QB
+
+# expected yards after catch based on how open someone is
