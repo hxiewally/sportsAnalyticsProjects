@@ -41,3 +41,5 @@ tracking.frame <- tracking.single.play[tracking.single.play$frame.id == pass.fra
 library(ggplot2)
 
 ggplot(tracking.frame) + geom_point(aes(x=x, y=y, colour=team))
+
+#expected yards after catch based on how open someone is
