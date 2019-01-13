@@ -1,5 +1,6 @@
 # read in data
-tracking_gameId_2017092100 <- read.csv(tracking_gameId_2017092100.csv)
+tracking_gameId_2017092100 <- read.csv("tracking_gameId_2017092100.csv")
+plays <- read.csv("plays.csv")
 
 # load plays data
 # load tracking data for the game between SF 49ers and LA Rams
