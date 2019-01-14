@@ -41,7 +41,7 @@ library(ggplot2)
 ggplot(tracking.frame) + geom_point(aes(x=x, y=y, colour=team), size=4)
 
 
-GetPlayPassFrame <- function(tracking.third.passing.df, this.playId) {
+GetPlayPassFrame <- function(tracking.third.passing.df, this.playId, roster) {
   # Get the passing frame for one play during a game
   #
   # Args:
@@ -64,6 +64,7 @@ GetPlayPassFrame <- function(tracking.third.passing.df, this.playId) {
   print(this.playId)
   print(pass.frame.id)
   tracking.frame.df <- tracking.this.play.df[tracking.this.play.df$frame.id == pass.frame.id, ]
+  tracking.frame.df <- tracking.frame.df %>% left_join(roster %>% select(nflId, PositionAbbr), by = 'nflId')
   return(tracking.frame.df)
 }
 
@@ -90,14 +91,15 @@ GetGamePassFrames <- function(plays.df, game.tracking.df) {
   df.list <- list()
   for (i in 1:length(third.passing.plays)) {
     this.playId <- third.passing.plays[i]
-    df.list[[i]] <- GetPlayPassFrame(tracking.third.passing.df, this.playId)
+    df.list[[i]] <- GetPlayPassFrame(tracking.third.passing.df, this.playId, roster)
   }
   return(df.list)
 }
 
 plays.df <- read.csv("~/Downloads/Big-Data-Bowl-master/Data/plays.csv")
 game.tracking.df <- read.csv("~/Downloads/Big-Data-Bowl-master/Data/tracking_gameId_2017090700.csv")
-test <- GetGamePassFrames(plays.df, game.tracking.df)
+players.df <- read_csv('~/Downloads/Big-Data-Bowl-master/Data/players.csv')
+test <- GetGamePassFrames(plays.df, game.tracking.df, players.df)
 
 j <- 1
 df <- test[[j]]
@@ -202,7 +204,7 @@ for (gameId in unique(plays.df$gameId)) {
 
 gameId <- 2017092100
 game.tracking.df <- read.csv(paste("~/Downloads/Big-Data-Bowl-master/Data/tracking_gameId_", gameId, ".csv", sep=""))
-test <- GetGamePassFrames(plays.df, game.tracking.df)
+test <- GetGamePassFrames(plays.df, game.tracking.df, players.df)
 
 play.list <- list()
 dist.data <- matrix(nrow=10, ncol=10)
