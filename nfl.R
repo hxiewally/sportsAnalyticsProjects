@@ -1,8 +1,8 @@
 library(tidyverse)
 
-plays.df <- read.csv("~/Downloads/Big-Data-Bowl-master/Data/plays.csv")
-games.df <- read.csv("~/Downloads/Big-Data-Bowl-master/Data/games.csv")
-players.df <- read.csv("~/Downloads/Big-Data-Bowl-master/Data/players.csv")
+plays.df <- read.csv("plays.csv")
+games.df <- read.csv("games.csv")
+players.df <- read.csv("players.csv")
 
 
 ######################### Functions for getting passing frames #########################
@@ -174,18 +174,53 @@ CalculateDistances <- function(passing.frame, players.df) {
   return(min.dist)
 }
 
+CalculateDistMean <- function(passing.frame, players.df) {
+  # Calculate the minimum distances from the closest defender for all eligible receivers
+  #
+  # Args:
+  # pass.frame: data frame for the passing time frame
+  # players.df: data frame of player information
+  #
+  # Returns:
+  # vector of minimum distances (length 5)
+  
+  #football <- passing.frame %>% filter(team == 'ball')
+  min.dist <- rep(0, 5)
+  passing.frame.merged <- passing.frame %>% inner_join(players.df)  # this gets rid of the ball
+  qb <- passing.frame.merged %>% filter(PositionAbbr == 'QB')
+  passing.frame.merged$offense <- passing.frame.merged$team == qb$team
+  eligible.players <- passing.frame.merged %>% filter(offense == TRUE & PositionAbbr != 'QB' & (jerseyNumber < 50 | jerseyNumber > 79))
+  #if (dim(eligible.players)[1] != 5) {
+  #  print(eligible.players)
+  #}
+  defensive.players <- passing.frame.merged %>% filter(offense == FALSE)
+  for (i in 1:dim(eligible.players)[1]) {
+    dist.vec <- rep(0, 11)
+    x1 <- eligible.players$x[i]
+    y1 <- eligible.players$y[i]
+    for (j in 1:11) {
+      x2 <- defensive.players$x[j]
+      y2 <- defensive.players$y[j]
+      dist.vec[j] <- sqrt((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
+    }
+    mean.dist[i] <- mean(dist.vec)
+  }
+  return(mean.dist)
+}
+
 
 ######################################## Test code ########################################
 
 all.dist <- NULL
 play.list <- list()
-k <- 0
+
 for (gameId in unique(plays.df$gameId)) {
   print('Currently processing game:')
   print(gameId)
   game.tracking.df <- read.csv(paste("~/Downloads/Big-Data-Bowl-master/Data/tracking_gameId_", gameId, ".csv", sep=""))
   test <- GetGamePassFrames(plays.df, game.tracking.df)
   for (i in 1:length(test)) {
+    k <- 0    
     df <- test[[i]]
     if (!is.null(df)) {
       k <- k + 1
@@ -196,10 +231,28 @@ for (gameId in unique(plays.df$gameId)) {
   }
 }
 
+for (gameId in unique(plays.df$gameId)) {
+  print('Currently processing game:')
+  print(gameId)
+  game.tracking.df <- read.csv(paste("~/Downloads/Big-Data-Bowl-master/Data/tracking_gameId_", gameId, ".csv", sep=""))
+  test <- GetGamePassFrames(plays.df, game.tracking.df)
+  for (i in 1:length(test)) {
+    k <- 0    
+    df <- test[[i]]
+    if (!is.null(df)) {
+      k <- k + 1
+      current.dist.mean <- CalculateDistMean(df, players.df)  # mean distance vector
+      all.dist.mean <- rbind(all.dist, current.dist.mean)
+      play.list[[k]] <- df[1, ] %>% inner_join(plays.df)  # first row with merged play data
+    }
+  }
+}
+
 play.data.df <- do.call(rbind, play.list)
 
 play.data.df$success <- play.data.df$PlayResult > play.data.df$yardsToGo
-play.data.df$distance <- apply(all.dist, 1, min)
+play.data.df$distanceMin <- apply(all.dist, 1, min)
+play.data.df$distanceMean <- apply(all.dist.mean, 1, mean)
 
 library(ggthemes)
 
