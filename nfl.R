@@ -225,24 +225,9 @@ for (gameId in unique(plays.df$gameId)) {
     if (!is.null(df)) {
       k <- k + 1
       current.dist <- CalculateDistances(df, players.df)  # minimum distance vector
+      current.dist.mean <- CalculateDistMean(df, players.df)  # mean distance vector      
       all.dist <- rbind(all.dist, current.dist)
-      play.list[[k]] <- df[1, ] %>% inner_join(plays.df)  # first row with merged play data
-    }
-  }
-}
-
-for (gameId in unique(plays.df$gameId)) {
-  print('Currently processing game:')
-  print(gameId)
-  game.tracking.df <- read.csv(paste("~/Downloads/Big-Data-Bowl-master/Data/tracking_gameId_", gameId, ".csv", sep=""))
-  test <- GetGamePassFrames(plays.df, game.tracking.df)
-  for (i in 1:length(test)) {
-    k <- 0    
-    df <- test[[i]]
-    if (!is.null(df)) {
-      k <- k + 1
-      current.dist.mean <- CalculateDistMean(df, players.df)  # mean distance vector
-      all.dist.mean <- rbind(all.dist, current.dist.mean)
+      all.dist.mean <- rbind(all.dist, current.dist.mean)      
       play.list[[k]] <- df[1, ] %>% inner_join(plays.df)  # first row with merged play data
     }
   }
@@ -251,11 +236,12 @@ for (gameId in unique(plays.df$gameId)) {
 play.data.df <- do.call(rbind, play.list)
 
 play.data.df$success <- play.data.df$PlayResult > play.data.df$yardsToGo
-play.data.df$distanceMin <- apply(all.dist, 1, min)
-play.data.df$distanceMean <- apply(all.dist.mean, 1, mean)
+play.data.df$distanceMinMin <- apply(all.dist, 1, min) #Min of mins
+play.data.df$distanceMeanMin <- apply(all.dist, 1, mean) #Mean of mins
+play.data.df$distanceMeanMean <- apply(all.dist.mean, 1, mean) #mean of means
 
 library(ggthemes)
 
-ggplot(play.data.df) + geom_violin(aes(y=distance, x=success, fill=success)) +
+ggplot(play.data.df) + geom_violin(aes(y=distanceMeanMin, x=success, fill=success)) +
   ggtitle('1734 Third Down Passing Plays') + 
   theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5))
