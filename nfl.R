@@ -243,6 +243,10 @@ play.data.df$distanceMeanMean <- apply(all.dist.mean, 1, mean) #mean of means
 
 library(ggthemes)
 
-ggplot(play.data.df) + geom_violin(aes(y=distanceMeanMin, x=success, fill=success)) +
+# ggplot(play.data.df) + geom_violin(aes(y=distanceMeanMin, x=success, fill=success)) +
+#   ggtitle('1734 Third Down Passing Plays') + 
+#   theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5)) + ylab('Mean of Min Yards To Eligible Receivers Per Play')
+
+ggplot(play.data.df) + geom_violin(aes(y=distanceMeanMean, x=success, fill=success)) +
   ggtitle('1734 Third Down Passing Plays') + 
-  theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5)) + ylab('Mean of Min Yards To Eligible Receivers Per Play')
+  theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5)) + ylab('Mean of Mean Yards To Eligible Receivers Per Play')
