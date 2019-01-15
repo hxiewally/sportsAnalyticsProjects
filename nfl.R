@@ -185,7 +185,7 @@ CalculateDistMean <- function(passing.frame, players.df) {
   # vector of minimum distances (length 5)
   
   #football <- passing.frame %>% filter(team == 'ball')
-  min.dist <- rep(0, 5)
+  mean.dist <- rep(0, 5)
   passing.frame.merged <- passing.frame %>% inner_join(players.df)  # this gets rid of the ball
   qb <- passing.frame.merged %>% filter(PositionAbbr == 'QB')
   passing.frame.merged$offense <- passing.frame.merged$team == qb$team
@@ -212,22 +212,23 @@ CalculateDistMean <- function(passing.frame, players.df) {
 ######################################## Test code ########################################
 
 all.dist <- NULL
+all.dist.mean <- NULL
 play.list <- list()
+k <- 0
 
 for (gameId in unique(plays.df$gameId)) {
   print('Currently processing game:')
   print(gameId)
-  game.tracking.df <- read.csv(paste("~/Downloads/Big-Data-Bowl-master/Data/tracking_gameId_", gameId, ".csv", sep=""))
+  game.tracking.df <- read.csv(paste("tracking_gameId_", gameId, ".csv", sep=""))
   test <- GetGamePassFrames(plays.df, game.tracking.df)
   for (i in 1:length(test)) {
-    k <- 0    
     df <- test[[i]]
     if (!is.null(df)) {
       k <- k + 1
       current.dist <- CalculateDistances(df, players.df)  # minimum distance vector
       current.dist.mean <- CalculateDistMean(df, players.df)  # mean distance vector      
       all.dist <- rbind(all.dist, current.dist)
-      all.dist.mean <- rbind(all.dist, current.dist.mean)      
+      all.dist.mean <- rbind(all.dist.mean, current.dist.mean)      
       play.list[[k]] <- df[1, ] %>% inner_join(plays.df)  # first row with merged play data
     }
   }
@@ -244,4 +245,4 @@ library(ggthemes)
 
 ggplot(play.data.df) + geom_violin(aes(y=distanceMeanMin, x=success, fill=success)) +
   ggtitle('1734 Third Down Passing Plays') + 
-  theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5))
+  theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5)) + ylab('Mean of Min Yards To Eligible Receivers Per Play')
