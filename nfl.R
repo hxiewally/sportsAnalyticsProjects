@@ -208,11 +208,47 @@ CalculateDistMean <- function(passing.frame, players.df) {
   return(mean.dist)
 }
 
+CalculateDistMax <- function(passing.frame, players.df) {
+  # Calculate the minimum distances from the closest defender for all eligible receivers
+  #
+  # Args:
+  # pass.frame: data frame for the passing time frame
+  # players.df: data frame of player information
+  #
+  # Returns:
+  # vector of minimum distances (length 5)
+  
+  #football <- passing.frame %>% filter(team == 'ball')
+  max.dist <- rep(0, 5)
+  passing.frame.merged <- passing.frame %>% inner_join(players.df)  # this gets rid of the ball
+  qb <- passing.frame.merged %>% filter(PositionAbbr == 'QB')
+  passing.frame.merged$offense <- passing.frame.merged$team == qb$team
+  eligible.players <- passing.frame.merged %>% filter(offense == TRUE & PositionAbbr != 'QB' & (jerseyNumber < 50 | jerseyNumber > 79))
+  #if (dim(eligible.players)[1] != 5) {
+  #  print(eligible.players)
+  #}
+  defensive.players <- passing.frame.merged %>% filter(offense == FALSE)
+  for (i in 1:dim(eligible.players)[1]) {
+    dist.vec <- rep(0, 11)
+    x1 <- eligible.players$x[i]
+    y1 <- eligible.players$y[i]
+    for (j in 1:11) {
+      x2 <- defensive.players$x[j]
+      y2 <- defensive.players$y[j]
+      dist.vec[j] <- sqrt((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
+    }
+    max.dist[i] <- max(dist.vec)
+  }
+  return(max.dist)
+}
+
+
 
 ######################################## Test code ########################################
 
 all.dist <- NULL
 all.dist.mean <- NULL
+all.dist.max <- NULL
 play.list <- list()
 k <- 0
 
@@ -226,9 +262,11 @@ for (gameId in unique(plays.df$gameId)) {
     if (!is.null(df)) {
       k <- k + 1
       current.dist <- CalculateDistances(df, players.df)  # minimum distance vector
-      current.dist.mean <- CalculateDistMean(df, players.df)  # mean distance vector      
+      current.dist.mean <- CalculateDistMean(df, players.df)  # mean distance vector
+      current.dist.max <- CalculateDistMax(df, players.df)  #max distance vector      
       all.dist <- rbind(all.dist, current.dist)
-      all.dist.mean <- rbind(all.dist.mean, current.dist.mean)      
+      all.dist.mean <- rbind(all.dist.mean, current.dist.mean)
+      all.dist.max <- rbind(all.dist.max, current.dist.max)      
       play.list[[k]] <- df[1, ] %>% inner_join(plays.df)  # first row with merged play data
     }
   }
@@ -236,10 +274,13 @@ for (gameId in unique(plays.df$gameId)) {
 
 play.data.df <- do.call(rbind, play.list)
 
-play.data.df$success <- play.data.df$PlayResult > play.data.df$yardsToGo
+play.data.df$success <- play.data.df$PlayResult >= play.data.df$yardsToGo
 play.data.df$distanceMinMin <- apply(all.dist, 1, min) #Min of mins
 play.data.df$distanceMeanMin <- apply(all.dist, 1, mean) #Mean of mins
 play.data.df$distanceMeanMean <- apply(all.dist.mean, 1, mean) #mean of means
+play.data.df$distanceMeanMax <- apply(all.dist.max, 1, mean) #mean of maxes
+play.data.df$distanceMaxMax <- apply(all.dist.max, 1, max) #max of maxes
+play.data.df$distanceMaxMin <- apply(all.dist, 1, max) #max of mins
 
 library(ggthemes)
 
@@ -247,6 +288,18 @@ library(ggthemes)
 #   ggtitle('1734 Third Down Passing Plays') + 
 #   theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5)) + ylab('Mean of Min Yards To Eligible Receivers Per Play')
 
-ggplot(play.data.df) + geom_violin(aes(y=distanceMeanMean, x=success, fill=success)) +
+# ggplot(play.data.df) + geom_violin(aes(y=distanceMeanMean, x=success, fill=success)) +
+#   ggtitle('1734 Third Down Passing Plays') + 
+#   theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5)) + ylab('Mean of Mean Yards To Eligible Receivers Per Play')
+
+ggplot(play.data.df) + geom_violin(aes(y=distanceMeanMax, x=success, fill=success)) +
   ggtitle('1734 Third Down Passing Plays') + 
-  theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5)) + ylab('Mean of Mean Yards To Eligible Receivers Per Play')
+  theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5))
+
+ggplot(play.data.df) + geom_violin(aes(y=distanceMaxMax, x=success, fill=success)) +
+  ggtitle('1734 Third Down Passing Plays') + 
+  theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5))
+
+ggplot(play.data.df) + geom_violin(aes(y=distanceMaxMin, x=success, fill=success)) +
+  ggtitle('1734 Third Down Passing Plays') + 
+  theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5))
