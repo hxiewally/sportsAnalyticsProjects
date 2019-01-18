@@ -281,6 +281,8 @@ play.data.df$distanceMeanMean <- apply(all.dist.mean, 1, mean) #mean of means
 play.data.df$distanceMeanMax <- apply(all.dist.max, 1, mean) #mean of maxes
 play.data.df$distanceMaxMax <- apply(all.dist.max, 1, max) #max of maxes
 play.data.df$distanceMaxMin <- apply(all.dist, 1, max) #max of mins
+play.data.df$distanceMinMax <- apply(all.dist.max, 1, min) #min of maxes
+play.data.df$distanceMinMean <- apply(all.dist.mean, 1, min) #min of means
 
 library(ggthemes)
 
@@ -301,5 +303,13 @@ ggplot(play.data.df) + geom_violin(aes(y=distanceMaxMax, x=success, fill=success
   theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5))
 
 ggplot(play.data.df) + geom_violin(aes(y=distanceMaxMin, x=success, fill=success)) +
+  ggtitle('1734 Third Down Passing Plays') + 
+  theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5))
+
+ggplot(play.data.df) + geom_violin(aes(y=distanceMinMax, x=success, fill=success)) +
+  ggtitle('1734 Third Down Passing Plays') + 
+  theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5))
+
+ggplot(play.data.df) + geom_violin(aes(y=distanceMinMean, x=success, fill=success)) +
   ggtitle('1734 Third Down Passing Plays') + 
   theme_fivethirtyeight() + theme(plot.title=element_text(hjust=0.5))
