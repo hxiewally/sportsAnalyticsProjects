@@ -36,24 +36,29 @@ calcAngleFromVector <- function(point.start, point.end, point.origin) {
   return(angle)
 }
 
-findBreakType <- function(angle) {
-  if (findInterval(angle, c(90 - 22.5,90 + 22.5)) == 1) {
-    return("fly")
-  } else if (findInterval(angle, c(135 - 22.5, 135 + 22.5)) == 1) {
-    return("corner")
-  } else if (findInterval(angle, c(180 - 22.5, 180 + 22.5)) == 1) {
-    return("out")
-  } else if (findInterval(angle, c(225 - 22.5, 225 + 45)) == 1) {
-    return("comeback")
-  } else if (findInterval(angle, c(315 - 45, 315 + 22.5)) == 1) {
-    return("curl")
-  } else if (findInterval(angle, c(360 - 22.5, 360)) == 1) {
-    return("dig")
-  } else if (findInterval(angle, c(0, 0 + 22.5)) == 1) {
-    return("dig")
-  } else if (findInterval(angle, c(45 - 22.5, 45 + 22.5)) == 1) {
-    return("post")
+calcRouteDistance <- function(playerRouteTrajectory) {
+  #Outputs list of route features related to route distance
+  playerRouteTrajectory.information.vector <- rep(NA,3)
+  last.element.count <- nrow(playerRouteTrajectory)
+
+  player.direct.distance.traveled <- sqrt((playerRouteTrajectory$x[last.element.count] - playerRouteTrajectory$x[1])^2 + (playerRouteTrajectory$y[last.element.count] - playerRouteTrajectory$y[1])^2)
+  playerRouteTrajectory.information.vector[1] <- player.direct.distance.traveled
+
+  player.total.distance.per.frame <- rep(NA, last.element.count - 1)
+  for (i in 1:length(player.total.distance.per.frame)) {
+    player.total.distance.per.frame[i] <- sqrt((playerRouteTrajectory$x[i + 1] - playerRouteTrajectory$x[i])^2 + (playerRouteTrajectory$y[i + 1] - playerRouteTrajectory$y[i])^2) 
+}
+  player.total.distance.traveled <- sum(player.total.distance.per.frame)
+  playerRouteTrajectory.information.vector[2] <- player.total.distance.traveled
+
+  player.vertical.distance.traveled <- abs(playerRouteTrajectory$x[last.element.count] - playerRouteTrajectory$x[1])
+  playerRouteTrajectory.information.vector[3] <- player.vertical.distance.traveled
+  if (player.vertical.distance.traveled <= 15) {
+    playerRouteTrajectory.information.vector[4] <- "short"
+  }   else {
+    playerRouteTrajectory.information.vector[4] <- "downfield"    
   }
+  return(playerRouteTrajectory.information.vector)
 }
 
 ##COUNT BREAK POINTS##
@@ -103,6 +108,33 @@ createAngleList <- function(player.route.frames, windowSize = 5) {
 }
 
 ##IDENTIFY FIRST BREAK POINT##
+
+findBreakType <- function(angle, routeDistance) {
+  if (routeDistance == "short") {
+    if (findInterval(angle, c(90,270)) == 1) {
+      return("dig")
+    } else {
+      return("slant")
+    }
+  } else {
+      if (findInterval(angle, c(90 - 22.5,90 + 22.5)) == 1) {
+        return("fly")
+      } else if (findInterval(angle, c(135 - 22.5, 135 + 22.5)) == 1) {
+        return("corner")
+      } else if (findInterval(angle, c(180 - 22.5, 180 + 22.5)) == 1) {
+        return("out")
+      } else if (findInterval(angle, c(225 - 22.5, 225 + 45)) == 1) {
+        return("comeback")
+      } else if (findInterval(angle, c(315 - 45, 315 + 22.5)) == 1) {
+        return("curl")
+      } else if (findInterval(angle, c(360 - 22.5, 360)) == 1) {
+        return("dig")
+      } else if (findInterval(angle, c(0, 0 + 22.5)) == 1) {
+        return("dig")
+      } else if (findInterval(angle, c(45 - 22.5, 45 + 22.5)) == 1) {
+        return("post")
+  }
+}
 
 findBreak <- function(angleList, breakWindowSize) {
   #Args:
