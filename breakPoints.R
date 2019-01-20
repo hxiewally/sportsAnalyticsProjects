@@ -8,28 +8,91 @@
 
 ##DETERMINE FIRST ROUTE BREAK POINT ANGLES##
 
-calcAngle <- function(v1,v2){
-  #Where v1 and v2 are multidimensional vectors pointing towards the same origin
-  #Probably switching to atan2
-  dot.prod <- v1%*%v2 
-  norm.v1 <- norm(v1,type="2")
-  norm.v2 <- norm(v2,type="2")
-  theta <- acos(dot.prod / (norm.v1 * norm.v2))
-  as.numeric(theta)
+calcAngle <- function(v1,v2) {
+  #Where v1 and v2 are two vectors pointing to the same origin
+  #v1 temporally comes before origin, v2 after
+  angle <- 180/pi * (atan2(v2[2],v2[1]) - atan2(v1[2],v1[1]))
+  return(angle)
 }
 
-##COUNT BREAK POINTS AND IDENTIFY FIRST BREAK POINT##
+calcAngle <- function(v1,v2) {
+  #Where v1 and v2 are two vectors pointing to the same origin
+  #v1 temporally comes before origin, v2 after
+  angle <- 180/pi * (atan2(v2[2],v2[1]) - atan2(v1[2],v1[1]))
+  if (angle < 0) {
+    angle <- angle + 360
+  }
+  return(angle)
+}
+
+calcAngleFromVector <- function(point.start, point.end, point.origin) {
+  #Calculate angle based on 2-d points taken from route frames
+  point.start <- as.matrix(point.start)
+  point.end <- as.matrix(point.end)
+  point.origin <- as.matrix(point.origin)
+  v1 <- point.origin - point.start
+  v2 <- point.origin - point.end
+  angle <- calcAngle(v1,v2)
+  return(angle)
+}
+
+##COUNT BREAK POINTS##
 #Iterate through points in receiver route path as origins. 
 #Call angle function.
 #Determine downfield distance traveled before first break point.
 #If no break points, fly route.
 
+# createAngleList <- function(player.route.frames, windowSize) {
+#   #Args:
+#   #player.route.frames: individual player route trajectory
+#   #windowSize: number of frames to origin, must be integer
+#   if (windowSize %% 1 != 0) {
+#     print("Window size is not an integer. Please input an integer.")
+#   }
+#   angleList <- rep(NA, nrow(player.route.frames) - 2 * windowSize) 
+#   for (i in 1:length(angleList)) {
+#     point.start <- c(player.route.frames$x[i], player.route.frames$y[i])
+#     point.origin <- c(player.route.frames$x[i + windowSize], player.route.frames$y[i + windowSize])      
+#     point.end <- c(player.route.frames$x[i + 2 * windowSize], player.route.frames$y[i + 2 * windowSize])
+#     angle <- calcAngleFromVector(point.start, point.origin, point.end)
+#     angleList[i] <- angle
+#   }
+#   return(angleList)  
+# }
+
+#Problem with above code is that it does not calculate initial angle
+
+createAngleList <- function(player.route.frames, windowSize = 5) {
+  #Args:
+  #player.route.frames: individual player route trajectory
+  #windowSize: number of frames from origin to endpoint, must be integer
+  #Suggest 5 for window size
+  if (windowSize %% 1 != 0) {
+    print("Window size is not an integer. Please input an integer.")
+  }
+  angleList <- rep(NA, nrow(player.route.frames) - windowSize) 
+  for (i in 1:length(angleList)) {
+    #point.start must be initiated farther back to calculate initial angle. 
+    point.start <- c(player.route.frames$x[i], 0)
+    point.origin <- c(player.route.frames$x[i], player.route.frames$y[i])      
+    point.end <- c(player.route.frames$x[i + windowSize], player.route.frames$y[i + windowSize])
+    angle <- calcAngleFromVector(point.start, point.origin, point.end)
+    angleList[i] <- angle
+  }
+  return(angleList)  
+}
+
 ##IDENTIFY FIRST BREAK POINT##
+
+findBreak <- function(angleList) {
+  
+}
 
 ##OBTAIN ROUTE DESCRIPTION VECTOR FOR ONE PLAYER PER PLAY##
 
-
-
+routeDescript2 <- function(player.route.frames) {
+  var(angleList)
+}
 
 #Using 2017101501 as an example game
 
@@ -65,7 +128,7 @@ ggplot(routes.2505) + geom_point(aes(x=x, y=y, colour=as.factor(nflId)))
 
 #Route break identification -- function aims to indentify breaks
 
-#direct distance traveled, total distance traveled, vertical distance traveled, downfield/short, first break point coordinates, name of first break, how many moves 
+#direct distance traveled, total distance traveled, vertical distance traveled, downfield/short, angle variance, first break point coordinates, name of first break, how many moves 
 
 #iterate through time frame of play for each receiver 
 #break is dramatic angle change within window of frames
@@ -76,6 +139,7 @@ ggplot(routes.2505) + geom_point(aes(x=x, y=y, colour=as.factor(nflId)))
 #Use player 2540200 as example - assemble information vector for player
 
 test.player <- routes.2505 %>% filter(nflId == 2540200)
+test.player2 <- routes.2505 %>% filter(nflId == 2559176)
 
 test.player.information.vector <- rep(NA, 7) 
 
