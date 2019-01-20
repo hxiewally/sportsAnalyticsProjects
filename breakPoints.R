@@ -1,5 +1,28 @@
 #Requires nfl.R and trajectories.R
 
+#####################
+##                 ##
+##    FUNCTIONS    ##
+##                 ##
+#####################
+
+##DETERMINE FIRST ROUTE BREAK POINT ANGLES##
+
+calcAngle <- function(v1,v2){
+  #Where v1 and v2 are multidimensional vectors pointing towards the same origin
+  #Probably switching to atan2
+  dot.prod <- v1%*%v2 
+  norm.v1 <- norm(v1,type="2")
+  norm.v2 <- norm(v2,type="2")
+  theta <- acos(dot.prod / (norm.v1 * norm.v2))
+  as.numeric(theta)
+}
+
+##OBTAIN ROUTE DESCRIPTION VECTOR FOR ONE PLAYER PER PLAY##
+
+
+
+
 #Using 2017101501 as an example game
 
 third.passing.df <- plays.df %>% filter(gameId == 2017101501, down == 3, PassResult == 'C')
@@ -34,7 +57,7 @@ ggplot(routes.2505) + geom_point(aes(x=x, y=y, colour=as.factor(nflId)))
 
 #Route break identification -- function aims to indentify breaks
 
-#direct distance traveled, total distance traveled, vertical distance traveled, downfield/short, first break angle, name of first break, how many breaks
+#direct distance traveled, total distance traveled, vertical distance traveled, downfield/short, first break point coordinates, name of first break, how many moves 
 
 #iterate through time frame of play for each receiver 
 #break is dramatic angle change within window of frames
@@ -48,7 +71,7 @@ test.player <- routes.2505 %>% filter(nflId == 2540200)
 
 test.player.information.vector <- rep(NA, 7) 
 
-last.element.count <- length(test.player$x)
+last.element.count <- nrow(test.player)
 
 player.direct.distance.traveled <- sqrt((test.player$x[last.element.count] - test.player$x[1])^2 + (test.player$y[last.element.count] - test.player$y[1])^2)
 
