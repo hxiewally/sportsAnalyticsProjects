@@ -18,6 +18,14 @@ calcAngle <- function(v1,v2){
   as.numeric(theta)
 }
 
+##COUNT BREAK POINTS AND IDENTIFY FIRST BREAK POINT##
+#Iterate through points in receiver route path as origins. 
+#Call angle function.
+#Determine downfield distance traveled before first break point.
+#If no break points, fly route.
+
+##IDENTIFY FIRST BREAK POINT##
+
 ##OBTAIN ROUTE DESCRIPTION VECTOR FOR ONE PLAYER PER PLAY##
 
 
