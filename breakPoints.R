@@ -103,7 +103,7 @@ createAngleFrames <- function(player.route.frames, windowSize) {
   angleList <- rep(NA, nrow(player.route.frames) - windowSize) 
   originVerticalDistanceList <- rep(NA, nrow(player.route.frames) - windowSize)  
   for (i in 1:length(angleList)) {
-    #point.start must be initiated farther back to angle relative to field and line of scrimmage. 
+    #point.start initiated with same y such that angle is absolute with respect to line of scrimmage. 
     point.start <- c(player.route.frames$x[i], 55)
     point.origin <- c(player.route.frames$x[i], player.route.frames$y[i])      
     point.end <- c(player.route.frames$x[i + windowSize], player.route.frames$y[i + windowSize])
