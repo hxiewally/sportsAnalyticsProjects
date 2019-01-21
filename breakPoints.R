@@ -151,25 +151,27 @@ identifyBasicRoute <- function(angleFrames, breakWindowSize) {
   #breakWindowSize: size of window to count presence of breaks in angle list. Not to be confused with windowSize for calculating angles.
   print(angleFrames[1,])
   breakList <- rep(NA, floor(ncol(angleFrames) / breakWindowSize))
+  breakDistanceList <- rep(NA, floor(ncol(angleFrames) / breakWindowSize))
   for (i in 1:length(breakList)) {
     # print(i)
     angleVar <- var(angleFrames[1, ((i - 1) * breakWindowSize + 1) : (i * breakWindowSize + 1)])
     print(angleVar)
     #estimate location in player route
     if (angleVar >= 60) {
-      breakDistance <- angleFrames[2, (i - 1) * breakWindowSize + 1]  
+      breakDistance <- angleFrames[2, (i - 1) * breakWindowSize + 1]
+      breakDistanceList[i] <- breakDistance  
       breakType <- findBreakType(mean(angleFrames[1, (i * breakWindowSize - 1) : (i * breakWindowSize + 1)]), breakDistance)
       breakList[i] <- breakType
     } 
   }
-  return(breakList)
+  return(rbind(breakList, breakDistanceList))
 }
 
 ##OBTAIN ROUTE DESCRIPTION VECTOR FOR ONE PLAYER PER PLAY##
 
 routeDescrip2 <- function(player.route.frames) {
   #Returns a list of direct distance traveled, total distance traveled, vertical distance traveled, downfield/short, angle variance, route type at first break, how many breaks for one player in one play
-  routeDescripList <- rep(NA,7)
+  routeDescripList <- as.list(rep(NA, 8))
   routeDistanceList <- calcRouteDistance(player.route.frames)
   directRouteDistance <- routeDistanceList[1]
   totalRouteDistance <- routeDistanceList[2]
@@ -180,11 +182,19 @@ routeDescrip2 <- function(player.route.frames) {
   routeAngleVar <- var(angleFrames[1,])  
   breakList <- identifyBasicRoute(angleFrames,10)
   print(breakList)
-  nonNAIndex <- which(!is.na(breakList))
-  firstBreakType <- breakList[min(nonNAIndex)]
-  moveCount <- length(which(!is.na(breakList)))
-  routeDescripList <- c(directRouteDistance, totalRouteDistance, verticalRouteDistance, routeVerticality, routeAngleVar, firstBreakType, moveCount)
+  nonNAIndex <- which(!is.na(breakList[1,]))
+  firstBreakType <- breakList[1,min(nonNAIndex)]
+  firstBreakDistance <- as.numeric(breakList[2,min(nonNAIndex)])  
+  moveCount <- as.numeric(length(which(!is.na(breakList[1,]))))
 
+  routeDescripList[[1]] <- as.numeric(directRouteDistance)
+  routeDescripList[[2]] <- as.numeric(totalRouteDistance)
+  routeDescripList[[3]] <- as.numeric(verticalRouteDistance)
+  routeDescripList[[4]] <- routeVerticality
+  routeDescripList[[5]] <- as.numeric(routeAngleVar)
+  routeDescripList[[6]] <- as.character(firstBreakType)
+  routeDescripList[[7]] <- as.numeric(firstBreakDistance)
+  routeDescripList[[8]] <- as.numeric(moveCount)   
   return(routeDescripList)
 }
 
@@ -217,5 +227,12 @@ ggplot(routes.2505) + geom_point(aes(x=x, y=y, colour=as.factor(nflId)))
 test.player <- routes.2505 %>% filter(nflId == 2540200)
 test.player2 <- routes.2505 %>% filter(nflId == 2559176)
 test.player3 <- routes.2505 %>% filter(nflId == 2552428)
+test.player4 <- routes.2505 %>% filter(nflId == 238457)
 
 testDescripList <- routeDescrip2(test.player)
+
+#loop for eligible players in one play
+for (i in 1:5) {
+
+  testDescripList <- routeDescrip2(test.player)      
+}
