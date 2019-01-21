@@ -149,6 +149,7 @@ identifyBasicRoute <- function(angleFrames, breakWindowSize) {
   #angleFrames: list of angles and distances for player from createAngleFrames function
   #windowSize: Window size for calculating 
   #breakWindowSize: size of window to count presence of breaks in angle list. Not to be confused with windowSize for calculating angles.
+  print(angleFrames[1,])
   breakList <- rep(NA, floor(ncol(angleFrames) / breakWindowSize))
   for (i in 1:length(breakList)) {
     # print(i)
