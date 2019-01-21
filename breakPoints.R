@@ -87,7 +87,7 @@ calcRouteDistance <- function(player.route.frames) {
 
 #Problem with above code is that it does not calculate initial angle
 
-createAngleFrames <- function(player.route.frames, windowSize = 5) {
+createAngleFrames <- function(player.route.frames, windowSize) {
   #Args:
   #player.route.frames: individual player route trajectory
   #windowSize: number of frames from origin to endpoint, must be integer > 1
@@ -104,7 +104,7 @@ createAngleFrames <- function(player.route.frames, windowSize = 5) {
   originVerticalDistanceList <- rep(NA, nrow(player.route.frames) - windowSize)  
   for (i in 1:length(angleList)) {
     #point.start must be initiated farther back to angle relative to field and line of scrimmage. 
-    point.start <- c(player.route.frames$x[i], 60)
+    point.start <- c(player.route.frames$x[i], 55)
     point.origin <- c(player.route.frames$x[i], player.route.frames$y[i])      
     point.end <- c(player.route.frames$x[i + windowSize], player.route.frames$y[i + windowSize])
     angle <- calcAngleFromVector(point.start, point.end, point.origin)
@@ -149,15 +149,15 @@ identifyBasicRoute <- function(angleFrames, breakWindowSize) {
   #angleFrames: list of angles and distances for player from createAngleFrames function
   #windowSize: Window size for calculating 
   #breakWindowSize: size of window to count presence of breaks in angle list. Not to be confused with windowSize for calculating angles.
-  print(angleFrames[1,])
+  #print(angleFrames[1,])
   breakList <- rep(NA, floor(ncol(angleFrames) / breakWindowSize))
   breakDistanceList <- rep(NA, floor(ncol(angleFrames) / breakWindowSize))
   for (i in 1:length(breakList)) {
-    # print(i)
+    #print(i)
     angleVar <- var(angleFrames[1, ((i - 1) * breakWindowSize + 1) : (i * breakWindowSize + 1)])
     print(angleVar)
     #estimate location in player route
-    if (angleVar >= 60) {
+    if (angleVar >= 40) {
       breakDistance <- angleFrames[2, (i - 1) * breakWindowSize + 1]
       breakDistanceList[i] <- breakDistance  
       breakType <- findBreakType(mean(angleFrames[1, (i * breakWindowSize - 1) : (i * breakWindowSize + 1)]), breakDistance)
@@ -180,8 +180,8 @@ routeDescrip2 <- function(player.route.frames) {
   
   angleFrames <- createAngleFrames(player.route.frames,5)
   routeAngleVar <- var(angleFrames[1,])  
-  breakList <- identifyBasicRoute(angleFrames,10)
-  print(breakList)
+  breakList <- identifyBasicRoute(angleFrames,8)
+  #print(breakList)
   nonNAIndex <- which(!is.na(breakList[1,]))
   firstBreakType <- breakList[1,min(nonNAIndex)]
   firstBreakDistance <- as.numeric(breakList[2,min(nonNAIndex)])  
