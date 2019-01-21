@@ -153,9 +153,9 @@ identifyBasicRoute <- function(angleFrames, breakWindowSize) {
   for (i in 1:length(breakList)) {
     # print(i)
     angleVar <- var(angleFrames[1, ((i - 1) * breakWindowSize + 1) : (i * breakWindowSize + 1)])
-    # print(angleVar)
+    print(angleVar)
     #estimate location in player route
-    if (angleVar >= 45) {
+    if (angleVar >= 60) {
       breakDistance <- angleFrames[2, (i - 1) * breakWindowSize + 1]  
       breakType <- findBreakType(mean(angleFrames[1, (i * breakWindowSize - 1) : (i * breakWindowSize + 1)]), breakDistance)
       breakList[i] <- breakType
@@ -177,7 +177,8 @@ routeDescrip2 <- function(player.route.frames) {
   
   angleFrames <- createAngleFrames(player.route.frames,5)
   routeAngleVar <- var(angleFrames[1,])  
-  breakList <- identifyBasicRoute(angleFrames,8)
+  breakList <- identifyBasicRoute(angleFrames,10)
+  print(breakList)
   nonNAIndex <- which(!is.na(breakList))
   firstBreakType <- breakList[min(nonNAIndex)]
   moveCount <- length(which(!is.na(breakList)))
