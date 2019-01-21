@@ -118,7 +118,7 @@ createAngleFrames <- function(player.route.frames, windowSize = 5) {
 
 findBreakType <- function(angle, breakDistance) {
   if (breakDistance < 11) {
-    >if (findInterval(angle, c(90,270)) == 1) {
+    if (findInterval(angle, c(90,270)) == 1) {
       firstBreakType <- "dig"
     } else {
       return("slant")
@@ -144,20 +144,24 @@ findBreakType <- function(angle, breakDistance) {
   }
 }
 
-identifyBasicRoute <- function(angleFrames, windowSize, breakWindowSize) {
+identifyBasicRoute <- function(angleFrames, breakWindowSize) {
   #Args:
   #angleFrames: list of angles and distances for player from createAngleFrames function
   #windowSize: Window size for calculating 
   #breakWindowSize: size of window to count presence of breaks in angle list. Not to be confused with windowSize for calculating angles.
   breakList <- rep(NA, floor(ncol(angleFrames) / breakWindowSize))
   for (i in 1:length(breakList)) {
-    angleVar <- var(angleList[(i - 1) * breakWindowSize + 1:i * breakWindowSize + 1])
+    print(i)
+    angleVar <- var(angleFrames[1, ((i - 1) * breakWindowSize + 1) : (i * breakWindowSize + 1)])
+    print(angleVar)
     #estimate location in player route
-    if (angleVar > 60) {
-      breakDistance <- [angelFrames  
-      breakType <- findBreakType(mean(angleList[i * breakWindowSize - 1 : i * breakWindowSize + 1]), breakDistance)
+    if (angleVar >= 45) {
+      breakDistance <- angleFrames[2, (i - 1) * breakWindowSize + 1]  
+      breakType <- findBreakType(mean(angleFrames[1, (i * breakWindowSize - 1) : (i * breakWindowSize + 1)]), breakDistance)
+      breakList[i] <- breakType
     } 
   }
+  return(breakList)
 }
 
 ##OBTAIN ROUTE DESCRIPTION VECTOR FOR ONE PLAYER PER PLAY##
