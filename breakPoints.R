@@ -91,7 +91,7 @@ createAngleFrames <- function(player.route.frames, windowSize) {
   #Args:
   #player.route.frames: individual player route trajectory
   #windowSize: number of frames from origin to endpoint, must be integer > 1
-  #Suggest 5 for window size
+  #Suggest trying 4 to 10 for window size
   if (windowSize %% 1 != 0) {
     print("Window size is not an integer. Please input an integer.")
     return(NULL)
@@ -117,16 +117,18 @@ createAngleFrames <- function(player.route.frames, windowSize) {
 ##IDENTIFY FIRST BREAK POINT##
 
 findBreakType <- function(angle, breakDistance) {
-  if (breakDistance < 11) {
-    if (findInterval(angle, c(90,270)) == 1) {
-      firstBreakType <- "dig"
-    } else {
+  if (breakDistance <= 5) {
+    if (findInterval(angle, c(135,180)) == 1) {
+      return("dig")
+    } else if (findInterval(angle, c(0,75)) == 1){
       return("slant")
-    }
+    } else {
+      return("unidentified move")
+    } 
   } else {        
-      if (findInterval(angle, c(90 - 22.5,90 + 22.5)) == 1) {
+      if (findInterval(angle, c(90 - 10,90 + 10)) == 1) {
       return("fly")
-    } else if (findInterval(angle, c(135 - 22.5, 135 + 22.5)) == 1) {
+    } else if (findInterval(angle, c(135 - 35, 135 + 22.5)) == 1) {
       return("corner")
     } else if (findInterval(angle, c(180 - 22.5, 180 + 22.5)) == 1) {
       return("out")
@@ -138,30 +140,45 @@ findBreakType <- function(angle, breakDistance) {
       return("dig")
     } else if (findInterval(angle, c(0, 0 + 22.5)) == 1) {
       return("dig")
-    } else if (findInterval(angle, c(45 - 22.5, 45 + 22.5)) == 1) {
+    } else if (findInterval(angle, c(45 - 22.5, 45 + 35)) == 1) {
       return("post")
     }
   }
 }
 
-identifyBasicRoute <- function(angleFrames, breakWindowSize) {
+identifyBasicRoute <- function(angleFrames, breakWindowSize, player.route.frames) {
   #Args:
   #angleFrames: list of angles and distances for player from createAngleFrames function
   #windowSize: Window size for calculating 
-  #breakWindowSize: size of window to count presence of breaks in angle list. Not to be confused with windowSize for calculating angles.
+  #breakWindowSize: size of window to count presence of breaks in angle list. Not to be confused with windowSize for calculating angles. Suggest trying 4 or 5 to 10 again for break window size.
   #print(angleFrames[1,])
   breakList <- rep(NA, floor(ncol(angleFrames) / breakWindowSize))
   breakDistanceList <- rep(NA, floor(ncol(angleFrames) / breakWindowSize))
-  for (i in 1:length(breakList)) {
-    #print(i)
-    angleVar <- var(angleFrames[1, ((i - 1) * breakWindowSize + 1) : (i * breakWindowSize + 1)])
-    print(angleVar)
-    #estimate location in player route
-    if (angleVar >= 40) {
-      breakDistance <- angleFrames[2, (i - 1) * breakWindowSize + 1]
-      breakDistanceList[i] <- breakDistance  
-      breakType <- findBreakType(mean(angleFrames[1, (i * breakWindowSize - 1) : (i * breakWindowSize + 1)]), breakDistance)
-      breakList[i] <- breakType
+
+  initialAngle <- mean(angleFrames[1,1:(breakWindowSize)])
+  if (findInterval(initialAngle, c(150,180)) == 1) {
+    breakList[1] <- "dig"
+    breakDistanceList[1] <- 0 
+  }
+  if (findInterval(initialAngle, c(0,75)) == 1) {
+    breakList[1] <- "slant"
+    breakDistanceList[1] <- 0  
+  }
+
+  for (i in 1:(length(breakList) - 1)) {
+    angleVar <- var(angleFrames[1, (i * breakWindowSize) : ((i + 1) * breakWindowSize)])
+    meanWindowAngle <- mean(angleFrames[1, (i * breakWindowSize) : ((i + 1) * breakWindowSize)])
+    print(c("meanAngle = ", meanWindowAngle))
+    print(c("angleVar = ", angleVar))
+    #estimate presence and location of break in player route based on angle variance
+    if (angleVar >= 60) {
+      print(i)
+      breakDistance <- abs(angleFrames[2, (i + 1) * breakWindowSize] - player.route.frames$x[1])
+      print(c("breakDistance = ",breakDistance))
+      breakDistanceList[i + 1] <- breakDistance 
+      breakType <- findBreakType(meanWindowAngle, breakDistance)
+      print(c("breakType =", breakType))
+      breakList[i + 1] <- breakType
     } 
   }
   return(rbind(breakList, breakDistanceList))
@@ -170,8 +187,8 @@ identifyBasicRoute <- function(angleFrames, breakWindowSize) {
 ##OBTAIN ROUTE DESCRIPTION VECTOR FOR ONE PLAYER PER PLAY##
 
 routeDescrip2 <- function(player.route.frames) {
-  #Returns a list of direct distance traveled, total distance traveled, vertical distance traveled, downfield/short, angle variance, route type at first break, how many breaks for one player in one play
-  routeDescripList <- as.list(rep(NA, 8))
+  #Returns a list of direct distance traveled, total distance traveled, vertical distance traveled, downfield/short, angle variance, route type at first break, first break distance, break list, move count
+  routeDescripList <- as.list(rep(NA, 9))
   routeDistanceList <- calcRouteDistance(player.route.frames)
   directRouteDistance <- routeDistanceList[1]
   totalRouteDistance <- routeDistanceList[2]
@@ -180,12 +197,12 @@ routeDescrip2 <- function(player.route.frames) {
   
   angleFrames <- createAngleFrames(player.route.frames,5)
   routeAngleVar <- var(angleFrames[1,])  
-  breakList <- identifyBasicRoute(angleFrames,8)
+  breakList <- identifyBasicRoute(angleFrames, 5, player.route.frames)
   #print(breakList)
   nonNAIndex <- which(!is.na(breakList[1,]))
   firstBreakType <- breakList[1,min(nonNAIndex)]
   firstBreakDistance <- as.numeric(breakList[2,min(nonNAIndex)])  
-  moveCount <- as.numeric(length(which(!is.na(breakList[1,]))))
+  moveCount <- length(which(!is.na(breakList[1,2:ncol(breakList)])))
 
   routeDescripList[[1]] <- as.numeric(directRouteDistance)
   routeDescripList[[2]] <- as.numeric(totalRouteDistance)
@@ -193,8 +210,9 @@ routeDescrip2 <- function(player.route.frames) {
   routeDescripList[[4]] <- routeVerticality
   routeDescripList[[5]] <- as.numeric(routeAngleVar)
   routeDescripList[[6]] <- as.character(firstBreakType)
-  routeDescripList[[7]] <- as.numeric(firstBreakDistance)
-  routeDescripList[[8]] <- as.numeric(moveCount)   
+  routeDescripList[[7]] <- firstBreakDistance
+  routeDescripList[[8]] <- breakList
+  routeDescripList[[9]] <- moveCount
   return(routeDescripList)
 }
 
@@ -228,11 +246,9 @@ test.player <- routes.2505 %>% filter(nflId == 2540200)
 test.player2 <- routes.2505 %>% filter(nflId == 2559176)
 test.player3 <- routes.2505 %>% filter(nflId == 2552428)
 test.player4 <- routes.2505 %>% filter(nflId == 238457)
+test.player5 <- routes.2505 %>% filter(nflId == 2555418)
 
 testDescripList <- routeDescrip2(test.player)
 
 #loop for eligible players in one play
-for (i in 1:5) {
-
-  testDescripList <- routeDescrip2(test.player)      
-}
+#not yet coded
