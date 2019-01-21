@@ -151,9 +151,9 @@ identifyBasicRoute <- function(angleFrames, breakWindowSize) {
   #breakWindowSize: size of window to count presence of breaks in angle list. Not to be confused with windowSize for calculating angles.
   breakList <- rep(NA, floor(ncol(angleFrames) / breakWindowSize))
   for (i in 1:length(breakList)) {
-    print(i)
+    # print(i)
     angleVar <- var(angleFrames[1, ((i - 1) * breakWindowSize + 1) : (i * breakWindowSize + 1)])
-    print(angleVar)
+    # print(angleVar)
     #estimate location in player route
     if (angleVar >= 45) {
       breakDistance <- angleFrames[2, (i - 1) * breakWindowSize + 1]  
@@ -166,17 +166,24 @@ identifyBasicRoute <- function(angleFrames, breakWindowSize) {
 
 ##OBTAIN ROUTE DESCRIPTION VECTOR FOR ONE PLAYER PER PLAY##
 
-routeDescript2 <- function(player.route.frames) {
+routeDescrip2 <- function(player.route.frames) {
   #Returns a list of direct distance traveled, total distance traveled, vertical distance traveled, downfield/short, angle variance, route type at first break, how many breaks for one player in one play
-  routeDescriptList <- rep(NA,7)
+  routeDescripList <- rep(NA,7)
   routeDistanceList <- calcRouteDistance(player.route.frames)
   directRouteDistance <- routeDistanceList[1]
   totalRouteDistance <- routeDistanceList[2]
   verticalRouteDistance <- routeDistanceList[3]
   routeVerticality <- routeDistanceList[4] 
   
-  angleList <- createAngleList(player.route.frames,5) 
-  routeAngleVar <- var(angleList)
+  angleFrames <- createAngleFrames(player.route.frames,5)
+  routeAngleVar <- var(angleFrames[1,])  
+  breakList <- identifyBasicRoute(angleFrames,8)
+  nonNAIndex <- which(!is.na(breakList))
+  firstBreakType <- breakList[min(nonNAIndex)]
+  moveCount <- length(which(!is.na(breakList)))
+  routeDescripList <- c(directRouteDistance, totalRouteDistance, verticalRouteDistance, routeVerticality, routeAngleVar, firstBreakType, moveCount)
+
+  return(routeDescripList)
 }
 
 #Using 2017101501 as an example game
