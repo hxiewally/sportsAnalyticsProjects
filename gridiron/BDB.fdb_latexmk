@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1548139611 "BDB.tex" "BDB.pdf" "BDB" 1548139611
+["pdflatex"] 1548142908 "BDB.tex" "BDB.pdf" "BDB" 1548142908
   "/usr/local/texlive/2017/texmf-dist/fonts/map/fontname/texfonts.map" 1480098670 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2017/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1480098698 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2017/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm" 1480098698 916 f87d7c45f9c908e672703b83b72241a3 ""
@@ -63,8 +63,8 @@
   "/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1495593472 2350277 a699055bee05bf8a40b0504752487295 ""
   "/usr/local/texlive/2017/texmf-var/web2c/pdftex/pdflatex.fmt" 1495593487 4129592 0e6cfee100d68e6d96b92c0258f2ff73 ""
   "/usr/local/texlive/2017/texmf.cnf" 1495593465 577 2b71d4d888f9e5560b2e99985915a9fa ""
-  "BDB.aux" 1548139611 8 a94a2480d3289e625eea47cd1b285758 ""
-  "BDB.tex" 1548139609 5317 8af9fac5a623348e07d37a50ddbee8d5 ""
+  "BDB.aux" 1548142908 8 a94a2480d3289e625eea47cd1b285758 ""
+  "BDB.tex" 1548142907 5381 2123ef4936651618f37596c79a07a7e5 ""
   (generated)
   "BDB.aux"
   "BDB.pdf"
