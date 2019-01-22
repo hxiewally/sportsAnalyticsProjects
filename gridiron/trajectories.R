@@ -1,3 +1,67 @@
+library(tidyverse)
+
+plays.df <- read.csv("~/Downloads/Big-Data-Bowl-master/Data/plays.csv")
+games.df <- read.csv("~/Downloads/Big-Data-Bowl-master/Data/games.csv")
+players.df <- read.csv("~/Downloads/Big-Data-Bowl-master/Data/players.csv")
+
+all.features <- NULL
+play.list <- list()
+k <- 0
+for (gameId in unique(plays.df$gameId)) {
+  print('Currently processing game:')
+  print(gameId)
+  game.tracking.df <- read.csv(paste("~/Downloads/Big-Data-Bowl-master/Data/tracking_gameId_", gameId, ".csv", sep=""))
+  current.gameId <- game.tracking.df$gameId[1]
+  # filter out plays in this game 
+  current.plays <- plays.df[plays.df$gameId == current.gameId, ]
+  # use plays data to third down passing plays in this game
+  is.third.passing <- (current.plays$down == 3) & (!is.na(current.plays$PassLength))
+  third.passing.plays <- current.plays$playId[is.third.passing]
+  # tracking data for third down passing plays
+  tracking.is.third.passing <- game.tracking.df$playId %in% third.passing.plays
+  tracking.third.passing.df <- game.tracking.df[tracking.is.third.passing, ]
+  for (i in 1:length(third.passing.plays)) {
+    this.playId <- third.passing.plays[i]
+    tracking.frames.df <- GetRouteFrames(tracking.third.passing.df, this.playId)
+    if (!is.null(tracking.frames.df)) {
+      tracking.players.df <- GetReceiverRoutes(tracking.frames.df, players.df)
+      result <- try(CreateRouteFeatures(tracking.players.df))
+      if (class(result) == "try-error") {
+        print('Something is wrong!')
+        next
+      }
+      k <- k + 1
+      all.features <- rbind(all.features, result)
+      play.list[[k]] <- tracking.players.df[1, ] %>% inner_join(plays.df)
+    }
+  }
+}
+
+
+play.data.combo <- do.call(rbind, play.list)
+
+play.data.combo <- cbind.data.frame(play.data.combo, all.features)
+
+play.data.combo <- play.data.combo %>% inner_join(play.data.df, by=c("gameId", 'playId'))
+
+play.data.combo$success <- play.data.combo$PlayResult >= play.data.combo$yardsToGo
+
+play.data.combo$yardsToGo.levels <- cut(play.data.combo$yardsToGo, c(0, 4, 7, 10, 30))
+
+fit <- glm(success~fly+out+comeback+curl+dig+slant+corner+post+yardsToGo.levels, 
+           family='binomial',
+           data=play.data.combo)
+summary(fit)
+
+fit <- lm(distance~fly+out+comeback+curl+dig+slant+corner+post+yardsToGo.levels, 
+           data=play.data.combo)
+summary(fit)
+
+colSums(all.features)
+
+play.subset <- play.data.combo %>% filter(success == TRUE, yardsToGo.x > 10, corner > 0, post > 0, curl == 0)
+
+
 GetRouteFrames <- function(tracking.third.passing.df, this.playId) {
   # Get the route frames for one play during a game
   #
