@@ -1,6 +1,6 @@
 library(tidyverse)
 
-plays.df <- read.csv("playsNoFatMan.csv")
+plays.df <- read.csv("plays.csv")
 games.df <- read.csv("games.csv")
 players.df <- read.csv("players.csv")
 
