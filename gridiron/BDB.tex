@@ -43,25 +43,23 @@
 
 \section*{Introduction}
 
-As the New England Patriots demonstrated in their recent victory over the Kansas City Chiefs in the AFC Championship on January 20th, 2019, repeated third and long conversions can demoralize and exhaust a defense into submission. It goes without saying that maintaining a robust rate of third down conversions is integral to a consistently productive offense at any level of football. Consequently, in this report, we will survey features of successful third down conversions in the data set covering 91 games from the first six weeks of the 2017 NFL season.
+As the New England Patriots demonstrated in their recent victory over the Kansas City Chiefs in the AFC Championship on January 20th, 2019, repeated third and long conversions can demoralize and exhaust a defense into submission. It goes without saying that maintaining a robust rate of third down conversions is integral to a consistently productive offense at any level of football. Should a head coach and offensive coordinator opt for a passing play on a third down (perhaps on a third and long situation), what should they keep in mind with respect to receiver routes and movements to increase their chances of conversion? To help answer this question, we will survey features of successful third down conversions in the data set covering 91 games from the first six weeks of the 2017 NFL season in our report.
 
 In particular, to constrain the scope of this report and to fit it within the domain of Theme 3, receivers and routes, we analyzed third down forward pass plays that occurred in the data set. For simplification purposes, we define third down success as subsequent advancement to a first down without looking at third downs that led to fourth down plays. There were 1,734 third down pass plays in total, of which 1,030 resulted in failure.
 
 Over the course of our analysis, we first investigated our initial hypothesis that successful third down conversions demonstrate larger separation by yardage between eligible receivers and defenders at the point in time right before the execution of the forward pass. We then classified third down receiver routes at a fundamental level using information such as receiver movement angle and distance traveled downfield calculated from play data. Lastly, we built and analyzed logistic statistical models using route features as predictors to analyze whether certain features, such as basic route type or distance to first marked route angle change, were significant in predicting separation or successful conversion. Our results are detailed on the following pages.
 
-\section*{Example Plays}
-
-Positive Example -- 2505 (successful post)
-
-Negative Example -- Curl (Tom Brady negative route, 2 yards short, hard to change direction to to 1st down)
-
-Positive Example -- Good separation
-
-Three figures
-
-To illustrate the effect of separation and routes at a qualitative level, we look at two particular plays.
-
 \section*{Receiver Separation in Third Down Pass Plays}
+
+Prior to digging into route features, we first sought to identify cursory quantitative differences between the sample of third down pass-forward plays that failed or that which succeeded in an exploratory analysis. For each play, we isolated the frame immediately preceding the pass, by which point the QB has made his post-snap reads and has made his throwing decision. At this frame, we calculated the minimum distance of each ``standard'' eligible receiver in the play from his closest defender. 
+
+We determined standard eligible receivers by identifying non-QB players whose numbers were under 50 or greater than 79. Because plays in which offensive linemen and defensive players reported as eligible were inconsistently labeled in the data, we did not look at the paths of ``non-standard'' eligible personnel. Trick plays in which the QB was the receiver were not considered. Consequently, we obtained a vector of up to five non-zero distances between eligible receivers and their closest defender for each qualified third down passing play.       
+
+After iterating through all qualified third down passing plays, we plotted the means and maxes of these vectors in two violin plots.
+
+Logistic model.
+
+Ah, you are regressing to a different time window.
 
 Two figures -- max of min and mean of min
 
@@ -74,8 +72,6 @@ Both mean of mins and max of mins separations show that successful third down fo
 Third down conversions are 
 
 In
-
-Nine playes involved other personnel aside from tight ends, running backs, wide receivers reporting as eligible. Those were removed.
 
 First six weeks of games
 
@@ -90,6 +86,18 @@ If given more time, we would have also liked to have maximum separation between 
 Algorithimically classifying routes can be somewhat noisy?
 
 Two figures
+
+\section*{Example Plays}
+
+Positive Example -- 2505 (successful post)
+
+Negative Example -- Curl (Tom Brady negative route, 2 yards short, hard to change direction to to 1st down)
+
+Positive Example -- Good separation
+
+Three figures
+
+To illustrate the effect of separation and routes at a qualitative level, we look at two particular plays.
 
 \section*{Conclusion}
 
